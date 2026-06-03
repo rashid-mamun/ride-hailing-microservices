@@ -1,0 +1,31 @@
+{
+    "name": "@ride-hailing/shared-utils",
+    "version": "1.0.0",
+    "private": true,
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "typecheck": "tsc --noEmit -p tsconfig.json",
+        "test": "node -e \"console.log('no package tests')\"",
+        "lint": "eslint \"src/**/*.ts\""
+    },
+    "dependencies": {
+        "@nestjs/common": "^11.1.17",
+        "@opentelemetry/api": "^1.9.0",
+        "@opentelemetry/auto-instrumentations-node": "^0.76.0",
+        "@opentelemetry/exporter-trace-otlp-http": "^0.218.0",
+        "@opentelemetry/sdk-node": "^0.218.0",
+        "@ride-hailing/shared-types": "workspace:*",
+        "amqplib": "^0.10.8",
+        "opossum": "^9.0.0",
+        "winston": "^3.17.0",
+        "rxjs": "^7.8.2"
+    },
+    "devDependencies": {
+        "@types/amqplib": "^0.10.7",
+        "@types/node": "^20.17.57",
+        "typescript": "^5.8.3",
+        "@types/opossum": "^8.1.9"
+    }
+}
