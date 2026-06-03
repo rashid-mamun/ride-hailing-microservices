@@ -1,0 +1,65 @@
+services:
+    postgres-auth-test:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: auth_test_db
+        ports: ['15432:5432']
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d auth_test_db']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+    postgres-ride-test:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: ride_test_db
+        ports: ['15433:5432']
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d ride_test_db']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+    postgres-pricing-test:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: pricing_test_db
+        ports: ['15434:5432']
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d pricing_test_db']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+    postgres-payment-test:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: payment_test_db
+        ports: ['15435:5432']
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d payment_test_db']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+    redis-test:
+        image: redis:7-alpine
+        ports: ['16379:6379']
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+    rabbitmq-test:
+        image: rabbitmq:3-management
+        ports: ['15672:5672', '15673:15672']
+        healthcheck:
+            test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+            interval: 5s
+            timeout: 5s
+            retries: 10

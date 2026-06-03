@@ -1,0 +1,281 @@
+services:
+    postgres-auth:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: auth_db
+        ports: ['5432:5432']
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d auth_db']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        volumes: [postgres_auth_data:/var/lib/postgresql/data]
+
+    postgres-ride:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: ride_db
+        ports: ['5433:5432']
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d ride_db']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        volumes: [postgres_ride_data:/var/lib/postgresql/data]
+
+    postgres-pricing:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: pricing_db
+        ports: ['5434:5432']
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d pricing_db']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        volumes: [postgres_pricing_data:/var/lib/postgresql/data]
+
+    postgres-payment:
+        image: postgres:15-alpine
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: payment_db
+        ports: ['5435:5432']
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U postgres -d payment_db']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        volumes: [postgres_payment_data:/var/lib/postgresql/data]
+
+    redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    rabbitmq:
+        image: rabbitmq:3-management
+        ports: ['5672:5672', '15672:15672']
+        healthcheck:
+            test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+            interval: 10s
+            timeout: 5s
+            retries: 10
+
+    jaeger:
+        image: jaegertracing/all-in-one:latest
+        ports: ['16686:16686', '4318:4318']
+        environment:
+            COLLECTOR_OTLP_ENABLED: 'true'
+
+    api-gateway:
+        build:
+            context: .
+            dockerfile: apps/api-gateway/Dockerfile
+        env_file: .env
+        ports:
+            - '3000:3000'
+        depends_on:
+            postgres-auth:
+                condition: service_healthy
+            postgres-ride:
+                condition: service_healthy
+            postgres-pricing:
+                condition: service_healthy
+            postgres-payment:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+            jaeger:
+                condition: service_started
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/health || exit 1']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
+    auth-service:
+        build:
+            context: .
+            dockerfile: apps/auth-service/Dockerfile
+        env_file: .env
+        ports:
+            - '3001:3001'
+        depends_on:
+            postgres-auth:
+                condition: service_healthy
+            postgres-ride:
+                condition: service_healthy
+            postgres-pricing:
+                condition: service_healthy
+            postgres-payment:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+            jaeger:
+                condition: service_started
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/health || exit 1']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
+    ride-service:
+        build:
+            context: .
+            dockerfile: apps/ride-service/Dockerfile
+        env_file: .env
+        ports:
+            - '3002:3002'
+        depends_on:
+            postgres-auth:
+                condition: service_healthy
+            postgres-ride:
+                condition: service_healthy
+            postgres-pricing:
+                condition: service_healthy
+            postgres-payment:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+            jaeger:
+                condition: service_started
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3002/health || exit 1']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
+    location-service:
+        build:
+            context: .
+            dockerfile: apps/location-service/Dockerfile
+        env_file: .env
+        ports:
+            - '3003:3003'
+        depends_on:
+            postgres-auth:
+                condition: service_healthy
+            postgres-ride:
+                condition: service_healthy
+            postgres-pricing:
+                condition: service_healthy
+            postgres-payment:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+            jaeger:
+                condition: service_started
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3003/health || exit 1']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
+    pricing-service:
+        build:
+            context: .
+            dockerfile: apps/pricing-service/Dockerfile
+        env_file: .env
+        ports:
+            - '3004:3004'
+        depends_on:
+            postgres-auth:
+                condition: service_healthy
+            postgres-ride:
+                condition: service_healthy
+            postgres-pricing:
+                condition: service_healthy
+            postgres-payment:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+            jaeger:
+                condition: service_started
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3004/health || exit 1']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
+    payment-service:
+        build:
+            context: .
+            dockerfile: apps/payment-service/Dockerfile
+        env_file: .env
+        ports:
+            - '3006:3006'
+        depends_on:
+            postgres-auth:
+                condition: service_healthy
+            postgres-ride:
+                condition: service_healthy
+            postgres-pricing:
+                condition: service_healthy
+            postgres-payment:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+            jaeger:
+                condition: service_started
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3006/health || exit 1']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
+    notification-service:
+        build:
+            context: .
+            dockerfile: apps/notification-service/Dockerfile
+        env_file: .env
+
+        depends_on:
+            postgres-auth:
+                condition: service_healthy
+            postgres-ride:
+                condition: service_healthy
+            postgres-pricing:
+                condition: service_healthy
+            postgres-payment:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+            jaeger:
+                condition: service_started
+        healthcheck:
+            test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3005/health || exit 1']
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
+volumes:
+    postgres_auth_data:
+    postgres_ride_data:
+    postgres_pricing_data:
+    postgres_payment_data:
