@@ -1,0 +1,19 @@
+{
+    "name": "@ride-hailing/shared-types",
+    "version": "1.0.0",
+    "private": true,
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "typecheck": "tsc --noEmit -p tsconfig.json",
+        "test": "node -e \"console.log('no package tests')\"",
+        "lint": "eslint \"src/**/*.ts\""
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@types/amqplib": "^0.10.7",
+        "@types/node": "^20.17.57",
+        "typescript": "^5.8.3"
+    }
+}
